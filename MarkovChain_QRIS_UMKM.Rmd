@@ -1,0 +1,124 @@
+---
+title: "markovchain elisabet"
+author: "mich"
+date: '2022-08-19'
+output: html_document
+---
+
+```{r memanggil library}
+library(markovchain)
+library(diagram)
+library(expm)
+library(pracma)
+library(readxl)
+library(lubridate)
+library(ggplot2)
+```
+
+```{r Import Data}
+data_tgl <- read_excel("C:/Users/user/Downloads/data_qris_datetime.xlsx", sheet = 1)
+data <- read_excel("C:/Users/user/Downloads/data_qris_datetime.xlsx", sheet = 2)
+View(data_tgl)
+View(data)
+```
+
+```{r Visualisasi }
+data_tgl$tanggal = as.Date(data_tgl$tanggal,"%d-%m-%Y")
+data_tgl$bulan = format(data_tgl$tanggal,format = "%b")
+data_tgl$tahun = format(data_tgl$tanggal,format = "%Y")
+
+#PLOT1
+ggplot(data_tgl, aes(x = tanggal, y = jlh_qris_umkm)) +
+  geom_line() +
+  geom_point()
+
+#PLOT2
+ggplot(data_tgl, aes(x = tanggal, y = jlh_qris_umkm)) +
+  geom_bar(stat = "identity")
+
+#PLOT3
+data_aggr <- aggregate(jlh_qris_umkm ~ bulan, data_tgl[2:25,], FUN = mean)
+ggplot(data_aggr, aes(x = reorder(bulan,jlh_qris_umkm), y = jlh_qris_umkm)) +
+  geom_bar(stat = "identity")
+```
+
+```{r Membentuk Matriks Transisi}
+mysequence<- data$Peralihan
+myFit<-markovchainFit(data=mysequence,confidencelevel = .9,method = "mle")
+alofiMc<-myFit$estimate
+alofiMc
+```
+
+```{r}
+# mendefenisikan matriks transisi
+tmA <- matrix(c(0,0,.5,.5,0.143,.286,.571,0,.083,.333,.584,0,0,.5,0,.5),nrow = 4, byrow = TRUE)
+
+# membuat label ~ matriks transisi
+dtmcA <- new("markovchain",transitionMatrix=tmA, states=c("Naik Drastis","Naik","Turun","Turun Drastis"), name="MarkovChain A") 
+
+# plot bentuk markovchain
+plot(dtmcA,lwd = 1, main = "Markov Chain", )
+dtmcA
+```
+
+```{r Final State}
+initialState<-c(1,0,0,0)
+steps<-3
+
+finalState<-initialState*dtmcA^steps
+finalState
+```
+
+```{r Steady State}
+steadyStates(dtmcA)
+```
+
+```{r}
+stateNames <- c("Naik Drastis","Naik","Turun","Turun Drastis")
+
+row.names(tmA) <- stateNames; colnames(tmA) <- stateNames
+tmA = round(tmA,4)
+
+x <- matrix(c(1,0,0,0),nrow=1, byrow=TRUE)
+```
+
+```{r Forecast}
+#bulan pertama
+cat("Month 1 Forecast : ", round(x%*%tmA,3))
+
+#bulan kedua
+tmA2 <- tmA %^% 2
+cat("\nMonth 2 Forecast : ", round(x%*%tmA2,3))
+
+#bulan ketiga
+tmA3 <- tmA %^% 3
+cat("\nMonth 3 Forecast : ", round(x%*%tmA3,3))
+
+#bulan keempat
+tmA4 <- tmA %^% 4
+cat("\nMonth 4 Forecast : ", round(x%*%tmA4,3))
+
+#bulan kelima
+tmA5 <- tmA %^% 5
+cat("\nMonth 5 Forecast : ", round(x%*%tmA5,3))
+
+#bulan keenam
+tmA6 <- tmA %^% 6
+cat("\nMonth 6 Forecast : ", round(x%*%tmA6,3))
+
+#bulan ketujuh
+tmA7 <- tmA %^% 7
+cat("\nMonth 7 Forecast : ", round(x%*%tmA7,3))
+
+#bulan kedelapan
+tmA8 <- tmA %^% 8
+cat("\nMonth 8 Forecast : ", round(x%*%tmA8,3))
+
+#bulan kesembilan
+tmA9 <- tmA %^% 9
+cat("\nMonth 9 Forecast : ", round(x%*%tmA9,3))
+
+#bulan kesepuluh
+tmA10 <- tmA %^% 10
+cat("\nMonth 10 Forecast : ", round(x%*%tmA10,3))
+```
