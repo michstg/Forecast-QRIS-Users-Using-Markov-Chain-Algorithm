@@ -1,5 +1,6 @@
 # Forecast QRIS Users MSMEs (Micro, Small and Medium Enterprises) Using Markov Chain Algorithm
 Dataset = Data UMKM Pengguna QRIS Kota Medan (From Bank Indonesia North Sumatera)
+
 Times = December 2019 to June 2022
 
 Implementasi rantai markov pada data umkm pengguna qris di kota medan
